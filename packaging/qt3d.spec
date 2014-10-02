@@ -1,10 +1,13 @@
-Name:       qt5-qt3d
+# Package prefix
+%define pkgname qt5-qt3d
+
+Name:       qt3d
 Summary:    Qt 3D
-Version:    0.0~git731.0158ce783
-Release:    1%{?dist}
+Version:    5.3.2
+Release:    1
 Group:      Qt/Qt
 License:    LGPLv2.1 with exception or GPLv3
-URL:        http://qt.nokia.com
+URL:        http://qt.io
 Source0:    %{name}-%{version}.tar.xz
 BuildRequires:  qt5-qtcore-devel
 BuildRequires:  qt5-qtgui-devel
@@ -19,26 +22,38 @@ BuildRequires:  fdupes
 Qt is a cross-platform application and UI framework. Using Qt, you can
 write web-enabled applications once and deploy them across desktop,
 mobile and embedded systems without rewriting the source code.
-.
-This package contains the Qt 3D library
+
+This package contains the Qt 3D library.
 
 
-%package devel
-Summary:        Qt Quick 3D - development files
-Group:          Qt/Qt
-Requires:       %{name} = %{version}-%{release}
-Requires:       %{name}-devel = %{version}-%{release}
+%package -n %{pkgname}
+Summary:    Qt 3D
+Group:      Qt/Qt
 
-%description devel
+%description -n %{pkgname}
 Qt is a cross-platform application and UI framework. Using Qt, you can
 write web-enabled applications once and deploy them across desktop,
 mobile and embedded systems without rewriting the source code.
-.
-This package contains the Qt 3D development files
+
+This package contains the Qt 3D library.
+
+
+%package -n %{pkgname}-devel
+Summary:        Qt Quick 3D - development files
+Group:          Qt/Qt
+Requires:       %{pkgname} = %{version}-%{release}
+
+%description -n %{pkgname}-devel
+Qt is a cross-platform application and UI framework. Using Qt, you can
+write web-enabled applications once and deploy them across desktop,
+mobile and embedded systems without rewriting the source code.
+
+This package contains the Qt 3D development files.
 
 
 %prep
-%setup -q -n %{name}-%{version}/upstream
+%setup -q -n %{name}-%{version}
+
 
 %build
 export QTDIR=/usr/share/qt5
@@ -51,28 +66,26 @@ rm -rf %{buildroot}
 %qmake_install
 # Fix wrong path in pkgconfig files
 find %{buildroot}%{_libdir}/pkgconfig -type f -name '*.pc' \
--exec perl -pi -e "s, -L%{_builddir}/?\S+,,g" {} \;
+    -exec perl -pi -e "s, -L%{_builddir}/?\S+,,g" {} \;
 # Fix wrong path in prl files
 find %{buildroot}%{_libdir} -type f -name '*.prl' \
--exec sed -i -e "/^QMAKE_PRL_BUILD_DIR/d;s/\(QMAKE_PRL_LIBS =\).*/\1/" {} \;
+    -exec sed -i -e "/^QMAKE_PRL_BUILD_DIR/d;s/\(QMAKE_PRL_LIBS =\).*/\1/" {} \;
 # Remove unneeded .la files
 rm -f %{buildroot}/%{_libdir}/*.la
 
 # We don't need qt5/Qt/
 rm -rf %{buildroot}/%{_includedir}/qt5/Qt
 
-
 %fdupes %{buildroot}/%{_includedir}
 
 
-%post
+%post -n %{pkgname}
 /sbin/ldconfig
-%postun
+%postun -n %{pkgname}
 /sbin/ldconfig
 
 
-
-%files
+%files -n %{pkgname}
 %defattr(-,root,root,-)
 %{_libdir}/libQt53D.so.5
 %{_libdir}/libQt53D.so.5.*
@@ -81,8 +94,7 @@ rm -rf %{buildroot}/%{_includedir}/qt5/Qt
 %{_libdir}/qt5/qml/Qt3D/
 %{_qt5_bindir}/qglinfo
 
-
-%files devel
+%files -n %{pkgname}-devel
 %defattr(-,root,root,-)
 %{_libdir}/libQt53D.so
 %{_libdir}/libQt53D.prl
